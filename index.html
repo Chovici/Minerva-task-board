@@ -100,6 +100,19 @@
       font-size: 14px;
     }
 
+    .task button {
+      margin-top: 10px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background: #ef4444;
+      color: white;
+    }
+
     @media (max-width: 768px) {
       .board {
         grid-template-columns: 1fr;
@@ -154,6 +167,33 @@
   </div>
 
   <script>
+    let tasks = JSON.parse(localStorage.getItem("minervaTasks")) || [];
+
+    function saveTasks() {
+      localStorage.setItem("minervaTasks", JSON.stringify(tasks));
+    }
+
+    function displayTasks() {
+      document.getElementById("todo").innerHTML = "";
+      document.getElementById("progress").innerHTML = "";
+      document.getElementById("done").innerHTML = "";
+
+      tasks.forEach(function(task) {
+        const taskElement = document.createElement("div");
+        taskElement.className = "task";
+
+        taskElement.innerHTML = `
+          <h3>${task.title}</h3>
+          <p>${task.description}</p>
+          <button class="delete-btn" onclick="deleteTask(${task.id})">
+            Delete
+          </button>
+        `;
+
+        document.getElementById(task.status).appendChild(taskElement);
+      });
+    }
+
     function addTask() {
       const title = document.getElementById("taskTitle").value;
       const description = document.getElementById("taskDescription").value;
@@ -164,19 +204,32 @@
         return;
       }
 
-      const task = document.createElement("div");
-      task.className = "task";
+      const newTask = {
+        id: Date.now(),
+        title: title,
+        description: description,
+        status: status
+      };
 
-      task.innerHTML = `
-        <h3>${title}</h3>
-        <p>${description}</p>
-      `;
+      tasks.push(newTask);
 
-      document.getElementById(status).appendChild(task);
+      saveTasks();
+      displayTasks();
 
       document.getElementById("taskTitle").value = "";
       document.getElementById("taskDescription").value = "";
     }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function(task) {
+        return task.id !== id;
+      });
+
+      saveTasks();
+      displayTasks();
+    }
+
+    displayTasks();
   </script>
 
 </body>
